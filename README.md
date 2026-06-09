@@ -5,12 +5,14 @@
 [![DockerHub Pull](https://img.shields.io/docker/pulls/nodered/node-red.svg)](https://hub.docker.com/r/nodered/node-red/)
 [![DockerHub Stars](https://img.shields.io/docker/stars/nodered/node-red.svg?maxAge=2592000)](https://hub.docker.com/r/nodered/node-red/)
 
-This project describes some of the many ways Node-RED can be run under Docker and has support for multiple architectures (amd64, arm32v6, arm32v7, arm64v8, i386 and s390x).
+This project describes some of the many ways Node-RED can be run under Docker and has support for multiple architectures (amd64 and arm64v8).
 Some basic familiarity with Docker and the [Docker Command Line](https://docs.docker.com/engine/reference/commandline/cli/) is assumed.
 
 **Note**: In version 1.2 we removed the named VOLUME from the build. It should not affect many users - but the details are [here](volumechanges.md).
 
 As of Node-RED 1.0 this project provides the build for the `nodered/node-red` container on [Docker Hub](https://hub.docker.com/r/nodered/node-red/).
+
+As of Node-RED 4.0.9 the containers are also available from the [GitHub Container Regisry](https://github.com/node-red/node-red-docker/pkgs/container/node-red) as `ghcr.io/node-red/node-red` with the same tag names as on Docker Hub.
 
 Previous 0.20.x versions are still available at https://hub.docker.com/r/nodered/node-red-docker.
 
@@ -26,7 +28,8 @@ Let's dissect that command:
         -p 1880:1880            - connect local port 1880 to the exposed internal port 1880
         -v node_red_data:/data  - mount the host node_red_data directory to the container /data directory so any changes made to flows are persisted
         --name mynodered        - give this machine a friendly local name
-        nodered/node-red        - the image to base it on - currently Node-RED v2.1.3
+        nodered/node-red        - the image to base it on - currently Node-RED v5.0.0
+
 
 
 Running that command should give a terminal window with a running instance of Node-RED.
@@ -34,9 +37,9 @@ Running that command should give a terminal window with a running instance of No
         Welcome to Node-RED
         ===================
 
-        10 Oct 12:57:10 - [info] Node-RED version: v2.1.3
-        10 Oct 12:57:10 - [info] Node.js  version: v12.22.2
-        10 Oct 12:57:10 - [info] Linux 4.19.76-linuxkit x64 LE
+        10 Oct 12:57:10 - [info] Node-RED version: v5.0.0
+        10 Oct 12:57:10 - [info] Node.js  version: v24.11.1
+        10 Oct 12:57:10 - [info] Linux 6.17.5-200.fc42.x86_64 x64 LE
         10 Oct 12:57:11 - [info] Loading palette nodes
         10 Oct 12:57:16 - [info] Settings file  : /data/settings.js
         10 Oct 12:57:16 - [info] Context store  : 'default' [module=memory]
@@ -60,7 +63,7 @@ Running that command should give a terminal window with a running instance of No
 
         10 Oct 12:57:17 - [info] Starting flows
         10 Oct 12:57:17 - [info] Started flows
-        10 Oct 12:57:17 - [info] Server now running at http://127.0.0.1:1880/
+        10 Oct 12:57:17 - [info] Server now running at http://localhost:1880/
 
         [...]
 
@@ -92,13 +95,12 @@ and stop it again when required:
 The Node-RED images come in different variations and are supported by manifest lists (auto-detect architecture).
 This makes it more easy to deploy in a multi architecture Docker environment. E.g. a Docker Swarm with mix of Raspberry Pi's and amd64 nodes.
 
-The tag naming convention is `<node-red-version>-<node-version>-<image-type>-<architecture>`, where:
+The tag naming convention is `<node-red-version>-<node-version>-<image-type>`, where:
 - `<node-red-version>` is the Node-RED version.
 - `<node-version>` is the Node JS version.
 - `<image-type>` is type of image and is optional, can be either _none_ or minimal.
     - _none_ : is the default and has Python 2 & Python 3 + devtools installed
     - minimal : has no Python installed and no devtools installed
-- `<architecture>` is the architecture of the Docker host system, can be either amd64, arm32v6, arm32v7, arm64, s390x or i386.
 
 The minimal versions (without python and build tools) are not able to install nodes that require any locally compiled native code.
 
@@ -112,71 +114,39 @@ Using Alpine Linux reduces the built image size, but removes standard dependenci
 
 The following table shows the variety of provided Node-RED images.
 
-| **Tag**                    |**Node**| **Arch** | **Python** |**Dev**| **Base Image**         |
-|----------------------------|--------|----------|------------|-------|------------------------|
-| 2.1.3-12                   |   12   | amd64    |   2.x 3.x  |  yes  | amd64/node:12-alpine   |
-|                            |   12   | arm32v6  |   2.x 3.x  |  yes  | arm32v6/node:12-alpine |
-|                            |   12   | arm32v7  |   2.x 3.x  |  yes  | arm32v7/node:12-alpine |
-|                            |   12   | arm64v8  |   2.x 3.x  |  yes  | arm64v8/node:12-alpine |
-|                            |   12   | s390x    |   2.x 3.x  |  yes  | s390x/node:12-alpine   |
-|                            |   12   | i386     |   2.x 3.x  |  yes  | i386/node:12-alpine    |
-|                            |        |          |            |       |                        |
-| 2.1.3-12-minimal           |   12   | amd64    |     no     |  no   | amd64/node:12-alpine   |
-|                            |   12   | arm32v6  |     no     |  no   | arm32v6/node:12-alpine |
-|                            |   12   | arm32v7  |     no     |  no   | arm32v7/node:12-alpine |
-|                            |   12   | arm64v8  |     no     |  no   | arm64v8/node:12-alpine |
-|                            |   12   | s390x    |     no     |  no   | s390x/node:12-alpine   |
-|                            |   12   | i386     |     no     |  no   | i386/node:12-alpine    |
-
-| **Tag**                    |**Node**| **Arch** | **Python** |**Dev**| **Base Image**         |
-|----------------------------|--------|----------|------------|-------|------------------------|
-| 2.1.3-14                   |   14   | amd64    |   2.x 3.x  |  yes  | amd64/node:14-alpine   |
-|                            |   14   | arm32v6  |   2.x 3.x  |  yes  | arm32v6/node:14-alpine |
-|                            |   14   | arm32v7  |   2.x 3.x  |  yes  | arm32v7/node:14-alpine |
-|                            |   14   | arm64v8  |   2.x 3.x  |  yes  | arm64v8/node:14-alpine |
-|                            |   14   | s390x    |   2.x 3.x  |  yes  | s390x/node:14-alpine   |
-|                            |   14   | i386     |   2.x 3.x  |  yes  | i386/node:14-alpine    |
-|                            |        |          |            |       |                        |
-| 2.1.3-14-minimal           |   14   | amd64    |     no     |  no   | amd64/node:14-alpine   |
-|                            |   14   | arm32v6  |     no     |  no   | arm32v6/node:14-alpine |
-|                            |   14   | arm32v7  |     no     |  no   | arm32v7/node:14-alpine |
-|                            |   14   | arm64v8  |     no     |  no   | arm64v8/node:14-alpine |
-|                            |   14   | s390x    |     no     |  no   | s390x/node:14-alpine   |
-|                            |   14   | i386     |     no     |  no   | i386/node:14-alpine    |
+| **Tag**                    |**Node**| **Arch** | **Python** |**Dev**| **Base Image**               |
+|:---------------------------|:------:|:--------:|:----------:|:-----:|:-----------------------------|
+| 5.0.0-24                   |   24   | amd64    |    3.x     |  yes  | amd64/node:24-alpine         |
+|                            |   24   | arm64v8  |    3.x     |  yes  | arm64v8/node:24-alpine       |
+|                            |        |          |            |       |                              |
+| 5.0.0-24-minimal           |   24   | amd64    |     no     |  no   | amd64/node:24-alpine         |
+|                            |   24   | arm64v8  |     no     |  no   | arm64v8/node:24-alpine       |
+|                            |        |          |            |       |                              |
+| 5.0.0-debian               |   24   | amd64    |    3.x     |  yes  | amd64/node:24-trixie-slim    |
+|                            |   24   | arm64v8  |    3.x     |  yes  | arm64v8/node:24-trixie-slim  |
 
 - All images have bash, tzdata, nano, curl, git, openssl and openssh-client pre-installed to support Node-RED's Projects feature.
 
 ## Manifest Lists
 The following table shows the provided Manifest Lists.
 
-| **Tag**                                | **Node-RED Base Image**                    |
-|----------------------------------------|--------------------------------------------|
-| latest, 2.1.3,                         | nodered/node-red:2.1.3-14                  |
-| latest-14, 2.1.3-14                    |                                            |
-|                                        |                                            |
-|                                        |                                            |
-| latest-minimal, 2.1.3-minimal,         | nodered/node-red:2.1.3-14-minimal          |
-| latest-14-minimal, 2.1.3-14-minimal    |                                            |
-
 
 | **Tag**                                | **Node-RED Base Image**                    |
 |----------------------------------------|--------------------------------------------|
-| latest-12, 2.1.3-12                    | nodered/node-red:2.1.3-12                  |
-|                                        |                                            |
-| latest-12-minimal, 2.1.3-12-minimal    | nodered/node-red:2.1.3-12-minimal    |
-
+| latest, latest-24, 5.0.0-24            | nodered/node-red:5.0.0-24                  |
+| latest-24-minimal, 5.0.0-24-minimal    | nodered/node-red:5.0.0.6-24-minimal        |
 
 With the support of Docker manifest list, there is no need to explicitly add the tag for the architecture to use.
 When a docker run command or docker service command or docker stack command is executed, docker checks which architecture is required and verifies if it is available in the docker repository. If it does, docker pulls the matching image for it.
 
 Therefore all tags regarding Raspberry PI's are dropped.
 
-For example: suppose you are running on a Raspberry PI 3B, which has `arm32v7` as architecture. Then just run the following command to pull the image (tagged by `2.1.3-14`), and run the container.
+
+For example: suppose you are running on a Raspberry PI 4B, which has `arm64v8` as architecture. Then just run the following command to pull the image (tagged by `5.0.0-24`), and run the container.
+
 ```
 docker run -it -p 1880:1880 -v node_red_data:/data --name mynodered nodered/node-red:latest
 ```
-
-The same command can be used for running on an amd64 system, since docker discovers its running on a amd64 host and pulls the image with the matching tag (`2.1.3-13-amd64`).
 
 This gives the advantage that you don't need to know/specify which architecture you are running on and makes docker run commands and docker compose files more flexible and exchangeable across systems.
 
@@ -311,7 +281,7 @@ Docker build process, the dependencies are installed under `/usr/src/node-red`.
 The main sections to modify are
 
     "dependencies": {
-        "node-red": "^2.1.3",           <-- set the version of Node-RED here
+        "node-red": "^5.0.0",           <-- set the version of Node-RED here
         "node-red-dashboard": "*"        <-- add any extra npm packages here
     },
 
